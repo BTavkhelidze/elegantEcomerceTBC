@@ -14,7 +14,6 @@ import {
 import { FormProvider } from 'react-hook-form';
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -23,11 +22,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const formSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6).max(12),
-  passwordConfirm: z.string(),
-});
+import { passwordMatchSchema } from '@/validation/passwordMatchSchema';
+import { registerUser } from './action';
+
+const formSchema = z
+  .object({
+    email: z.string().email(),
+  })
+  .and(passwordMatchSchema);
 
 const RegisterPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -38,10 +40,16 @@ const RegisterPage = () => {
       passwordConfirm: '',
     },
   });
-  console.log(form);
 
-  const handleSubmit = (data: any) => {
-    console.log(data, 'data');
+  const handleSubmit = async (data: z.infer<typeof formSchema>) => {
+    const response = await registerUser({
+      email: data.email,
+      password: data.password,
+      passwordConfirm: data.passwordConfirm,
+    });
+
+    console.log(response);
+    // form.reset();
   };
 
   return (
